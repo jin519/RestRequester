@@ -1,15 +1,23 @@
-import data_structure.ServerMeta;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
+import java.io.IOException;
 import java.util.LinkedHashMap;
 
 /**
  * 인자로 받은 request 정보를 바탕으로<br>
  * REST API를 제공하는 서버와 통신한다.<br>
- *
  * @author 원진
  * @contact godjin519@gmail.com
  */
 public class RestRequester
 {
+    private final static CloseableHttpClient HTTP_CLIENT = HttpClients.createDefault();
+
     /**
      * API 접근 경로
      */
@@ -56,12 +64,63 @@ public class RestRequester
     }
 
     /**
-     * API 접근 경로를 반환한다.
-     * @return API 접근 경로
+     * REST API를 호출한다.
+     * @return API가 제공한 데이터
      */
-    public String getUri()
+    public String request()
     {
-        return uri;
+        final HttpRequestBase HTTP_REQUEST =
+                HttpRequestFactory.getInstance(uri, httpMethodType, params, headers);
+
+        CloseableHttpResponse httpResponse = null;
+        try
+        {
+            httpResponse = HTTP_CLIENT.execute(HTTP_REQUEST);
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        assert httpResponse != null;
+
+        final int STATUS_CODE = httpResponse.getStatusLine().getStatusCode();
+        if (STATUS_CODE != HttpStatus.SC_OK)
+            throw new HttpResponseStatusException("HTTP Status error!");
+
+        final HttpEntity ENTITY = httpResponse.getEntity();
+
+        String retVal = null;
+        try
+        {
+            retVal = EntityUtils.toString(ENTITY);
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+
+        try
+        {
+            EntityUtils.consume(ENTITY);
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        finally
+        {
+            try
+            {
+                httpResponse.close();
+                HTTP_REQUEST.completed();
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+        }
+
+        return retVal;
     }
 
     /**

@@ -1,5 +1,8 @@
-package data_structure;
-
+/**
+ * 서버 정보를 저장한다.
+ * @author 원진
+ * @contact godjin519@gmail.com
+ */
 public class ServerMeta
 {
     private String uriScheme;
