@@ -162,12 +162,15 @@ public class RestRequester
 
     /**
      * API 파라미터를 설정한다.
-     * @param params API 파라미터
+     * @param params API 파라미터|null
      */
     public void setParams(LinkedHashMap<String, String> params)
     {
-        this.params.clear();
-        this.params.putAll(params);
+        if (params != null)
+        {
+            this.params.clear();
+            this.params.putAll(params);
+        }
     }
 
     /**
@@ -182,12 +185,15 @@ public class RestRequester
 
     /**
      * 헤더 정보를 설정한다.
-     * @param headers 헤더 정보
+     * @param headers 헤더 정보|null
      */
     public void setHeaders(LinkedHashMap<String, String> headers)
     {
-        this.headers.clear();
-        this.headers.putAll(headers);
+        if (headers != null)
+        {
+            this.headers.clear();
+            this.headers.putAll(headers);
+        }
     }
 
     /**
